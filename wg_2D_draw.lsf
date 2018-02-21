@@ -1,0 +1,88 @@
+# wg_2D_draw.lsf - draw the waveguide geometry in Lumerical MODE
+newmode; newmode; redrawoff;
+
+
+# define wafer and waveguide structure
+thick_Clad = 6.0e-6;
+thick_BOX = 3e-6;
+thick_Core = 2.3e-6;###############################################################
+width_ridge = 2.3e-6; # width of the waveguide#########################################square waveguide
+thick_bottom_clad=0e-6;
+thick_Si=2e-6;
+
+thick_Slab = 0e-6; # for strip waveguides
+
+# define materials
+material_Clad = "OrmoClad - Const";###########################################
+material_BOX = "SiO2 (Glass) - Const";
+material_Si = "Si(Silicon) - Const";
+material_Core = "OrmoCore - Const";############################################
+material_Air= "Air (1)";
+
+
+
+materials; # run script to add materials
+
+
+
+# define simulation region
+width_margin = 14.0e-6; # space to include on the side of the waveguide###############################
+height_margin = 8.0e-6; # space to include above and below the waveguide########################################
+
+
+# calculate simulation volume
+# propagation in the x-axis direction; z-axis is wafer-normal
+Xmin = -2e-6; Xmax = 2e-6; # length of the waveguide
+Zmin = -2*height_margin-0.5e-6; Zmax = thick_Core + height_margin+1e-6;
+Y_span = 2*width_margin + width_ridge; Ymin = -Y_span/2; Ymax = -Ymin;
+
+
+# draw top cladding
+addrect; set("name","TopClad"); set("material", material_Clad);
+set("y", 0); set("y span", Y_span+1e-6);
+set("z min", 0); set("z max", thick_Clad*2);
+set("x min", Xmin); set("x max", Xmax);
+set("override mesh order from material database",1);
+set("mesh order",3); # similar to "send to back", put the cladding as a background.
+set("alpha", 0.75);
+
+
+# draw lower cladding
+addrect; set("name", "Bottom_Clad"); set("material", material_Clad);###########################
+set("x min", Xmin); set("x max", Xmax);
+set("z min", -thick_bottom_clad); set("z max", 0);
+set("y", 0); set("y span", Y_span+1e-6);
+set("alpha", 0.55);
+
+# draw buried oxide
+addrect; set("name", "Bottom_TOX"); set("material", material_BOX);###########################
+set("x min", Xmin); set("x max", Xmax);
+set("z min", -thick_BOX-thick_bottom_clad); set("z max", -thick_bottom_clad);
+set("y", 0); set("y span", Y_span+1e-6);
+set("alpha", 0.35);
+
+
+# draw waveguide
+addrect; set("name", "waveguide"); set("material",material_Core);################################
+set("y", 0); set("y span", width_ridge);
+set("z min", 0); set("z max", thick_Core);##############################
+set("x min", Xmin); set("x max", Xmax);
+
+
+# draw slab for rib waveguides
+#addrect; set("name", "slab"); set("material",material_Si);
+#if (thick_Slab==0) {
+#set("y min", 0); set("y max", 0);
+#} else {
+#set("y", 0); set("y span", Y_span+1e-6);
+#}
+#set("z min", 0); set("z max", thick_Slab);
+#set("x min", Xmin); set("x max", Xmax);
+#set("alpha", 0.2);
+
+# draw silicon wafer
+#addrect; set("name", "Wafer"); set("material", material_Si);
+#set("x min", Xmin); set("x max", Xmax);
+#set("z max", -thick_BOX-3e-6); set("z min", -thick_BOX-2e-6-5e-6);
+#set("y", 0); set("y span", Y_span+1e-6);
+#set("alpha", 1);
